@@ -22,6 +22,8 @@ class HomeViewController: UIViewController , UITableViewDataSource, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -57,7 +59,9 @@ class HomeViewController: UIViewController , UITableViewDataSource, UITableViewD
                         // TableViewを再表示する
                         self.tableView.reloadData()
                     }
+                   
                 })
+                
                 // 要素が変更されたら該当のデータをpostArrayから一度削除した後に新しいデータを追加してTableViewを再表示する
                 postsRef.observe(.childChanged, with: { snapshot in
                     print("DEBUG_PRINT: .childChangedイベントが発生しました。")
@@ -118,7 +122,10 @@ class HomeViewController: UIViewController , UITableViewDataSource, UITableViewD
         // セル内のボタンのアクションをソースコードで設定する
         cell.likeButton.addTarget(self, action:#selector(handleButton(_:forEvent:)), for: .touchUpInside)
         
+        cell.sendButton.addTarget(self, action:#selector(handleSendButton(_:forEvent:)), for: .touchUpInside)
         return cell
+        
+        
     }
     
     // セル内のボタンがタップされた時に呼ばれるメソッド
@@ -157,6 +164,33 @@ class HomeViewController: UIViewController , UITableViewDataSource, UITableViewD
             
         }
     }
+    
+    @objc func handleSendButton(_ sender: UIButton, forEvent event: UIEvent) {
+        print("DEBUG_PRINT: 送信ボタンがタップされました。")
+        // タップされたセルのインデックスを求める
+        let touch = event.allTouches?.first
+        let point = touch!.location(in: self.tableView)
+        let indexPath = tableView.indexPathForRow(at: point)
+        
+        let name = Auth.auth().currentUser?.displayName
+        
+        let cell = tableView.cellForRow(at: indexPath!) as! PostTableViewCell
+        
+        // 配列からタップされたインデックスのデータを取り出す
+        let postData = postArray[indexPath!.row]
+        print(cell.messageText.text)
+        if let messageText = cell.messageText.text {
+            postData.comment?.append("\(name!):\(messageText)")
+        }
+        // をFirebaseに保存する
+         let postRef = Database.database().reference().child(Const.PostPath).child(postData.id!)
+        if let comments = postData.comment {
+            let comment = ["comment":comments]
+            postRef.updateChildValues(comment)
+        }
+        
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

@@ -15,6 +15,10 @@ class PostTableViewCell: UITableViewCell {
     @IBOutlet weak var likeLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var captionLabel: UILabel!
+    @IBOutlet weak var messageText: UITextField!
+    @IBOutlet weak var sendButton: UIButton!
+    @IBOutlet weak var talkLabel: UILabel!
+
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -28,6 +32,14 @@ class PostTableViewCell: UITableViewCell {
     }
     
     func setPostData(_ postData: PostData) {
+        self.talkLabel.text = ""
+        for comment in postData.comment! {
+            self.talkLabel.text! += "\(comment)\n"
+        }
+       
+            print(postData.comment!)
+            print(postData.name!)
+            
         self.postImageView.image = postData.image
         
         self.captionLabel.text = "\(postData.name!) : \(postData.caption!)"
